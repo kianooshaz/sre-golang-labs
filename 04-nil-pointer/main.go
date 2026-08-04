@@ -1,29 +1,29 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
-type Config struct {
-	Database string
-}
+type StudentClass map[string]*string
 
 func main() {
 
-	var config *Config
+	classA := "Math"
+	classPointerA := &classA
 
-	fmt.Println(config.Database)
+	classB := "Science"
+	classPointerB := &classB
+
+	students := StudentClass{
+		"John":     classPointerA,
+		"Jane":     classPointerB,
+		"Kianoosh": classPointerB,
+	}
+
+	for key, value := range students {
+		fmt.Printf("Student: %s, Class: %s\n", key, *value)
+	}
+
+	classJohn := students["Kianoosh"]
+	fmt.Println(classJohn)
 }
-
-// func main(){
-
-// 	var config *Config
-
-// 	if config == nil {
-
-// 		fmt.Println("Config is missing")
-
-// 		return
-// 	}
-
-// 	fmt.Println(config.Database)
-
-// }
