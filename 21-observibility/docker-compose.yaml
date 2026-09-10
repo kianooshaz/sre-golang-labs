@@ -1,0 +1,17 @@
+# Local observability backend for lab 21.
+# Usage: make obs-up   (then open http://localhost:16686)
+#
+# Jaeger all-in-one receives OTLP gRPC on 4317 and serves the trace UI on
+# 16686. Run the app with OTLP_ENDPOINT=localhost:4317 to export spans.
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    container_name: pod-manager-jaeger
+    environment:
+      # Accept OTLP gRPC + HTTP (the app uses gRPC on 4317).
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "4317:4317"   # OTLP gRPC (what the app exports to)
+      - "4318:4318"   # OTLP HTTP
+    restart: unless-stopped

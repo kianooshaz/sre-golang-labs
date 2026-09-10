@@ -54,7 +54,7 @@ func CreateServiceHandler(w http.ResponseWriter, r *http.Request) {
 	service.Status = "UNKNOWN"
 	service.CreatedAt = time.Now()
 
-	Services[2] = service
+	Services[service.ID] = service
 	nextID++
 
 	w.WriteHeader(http.StatusCreated)

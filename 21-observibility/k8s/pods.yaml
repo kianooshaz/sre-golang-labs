@@ -1,0 +1,29 @@
+# Two demo pods created by "make k8s-deploy" so the cluster is not
+# empty when the class starts. The Go app can also create pods via the API.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-web
+  namespace: pod-manager
+  labels:
+    app: demo-web
+spec:
+  containers:
+    - name: web
+      image: nginx:alpine
+      ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-cache
+  namespace: pod-manager
+  labels:
+    app: demo-cache
+spec:
+  containers:
+    - name: cache
+      image: redis:7-alpine
+      ports:
+        - containerPort: 6379
