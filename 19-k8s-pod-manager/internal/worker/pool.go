@@ -36,23 +36,34 @@ type Pool struct {
 }
 
 func NewPool(st *store.Store, kc kube.Client, cfg Config) *Pool {
-	return &Pool{store: st, kube: kc, cfg: cfg}
+	return &Pool{store: st, kube: kc, cfg: cfg, ticker: time.NewTicker(cfg.Interval)}
 }
 
-// Start launches the worker goroutines. Non-blocking.
+// Start launches the worker goroutines and then blocks, re-queueing the whole
+// in-memory pod list on every tick, until the store is stopped.
+// Run it in its own goroutine: `go pool.Start()`.
 func (p *Pool) Start() {
-	p.ticker = time.NewTicker(p.cfg.Interval)
 	for i := 1; i <= p.cfg.Workers; i++ {
 		go p.worker(i)
 	}
+
 	slog.Info("worker pool started", "workers", p.cfg.Workers, "interval", p.cfg.Interval)
+
+	for {
+		select {
+		case <-p.store.Done():
+			return
+		case <-p.ticker.C:
+			if n := p.store.EnqueueAll(); n > 0 {
+				slog.Info("queued all pods for status check", "count", n)
+			}
+		}
+	}
 }
 
 // Stop stops the ticker and signals the workers to exit.
 func (p *Pool) Stop() {
-	if p.ticker != nil {
-		p.ticker.Stop()
-	}
+	p.ticker.Stop()
 	p.store.Stop()
 }
 
@@ -69,16 +80,6 @@ func (p *Pool) worker(id int) {
 
 		case name := <-p.store.Queue():
 			p.checkPod(log, name)
-
-		case <-p.ticker.C:
-			// Every tick, queue the whole in-memory pod list.
-			pods := p.store.ListPods()
-			for _, pod := range pods {
-				p.store.Enqueue(pod.Name)
-			}
-			if len(pods) > 0 {
-				log.Info("queued all pods for status check", "count", len(pods))
-			}
 		}
 	}
 }

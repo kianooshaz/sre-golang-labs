@@ -79,8 +79,9 @@ func build() {
 func convert() {
 	n := 42
 	s := fmt.Sprintf("%d", n)  // int -> string
-	i, _ := strconv.Atoi("42") // string -> int
+	i, _ := strconv.Atoi("25") // string -> int
 	f, _ := strconv.ParseFloat("3.14", 64)
+	s = strconv.Itoa(25)
 
 	bs := []byte("hello") // string -> []byte
 	str := string(bs)     // []byte -> string
@@ -123,6 +124,7 @@ func trimCase() {
 func replaceRepeat() {
 	s := "2026-09-02"
 	fmt.Println(strings.ReplaceAll(s, "-", "/")) // 2026/09/02
+	fmt.Println(strings.Replace(s, "-", "/", 1)) // 2026/09-02
 	fmt.Println(strings.Repeat("=", 10))         // ==========
 }
 

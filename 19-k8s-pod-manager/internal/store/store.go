@@ -45,7 +45,7 @@ func New() *Store {
 	return &Store{
 		pods:     make(map[string]Pod),
 		statuses: make(map[string]Status),
-		queue:    make(chan string, 128),
+		queue:    make(chan string, 1000),
 		stopCh:   make(chan struct{}),
 	}
 }
@@ -100,10 +100,32 @@ func (s *Store) GetStatus(name string) (Status, bool) {
 
 // Enqueue queues a pod name for the next free worker (never blocks).
 func (s *Store) Enqueue(name string) {
+	s.enqueue(name)
+}
+
+// enqueue reports whether the name was accepted into the queue.
+func (s *Store) enqueue(name string) bool {
 	select {
 	case s.queue <- name:
+		return true
 	default:
+		return false
 	}
+}
+
+// EnqueueAll queues every tracked pod name and returns how many were accepted.
+// Like Enqueue it never blocks: when the queue is full the remaining names are
+// dropped, since the next tick re-queues the whole list anyway.
+func (s *Store) EnqueueAll() int {
+	pods := s.ListPods()
+
+	queued := 0
+	for _, pod := range pods {
+		if s.enqueue(pod.Name) {
+			queued++
+		}
+	}
+	return queued
 }
 
 // Queue is the read side of the work queue, consumed by the workers.

@@ -27,7 +27,7 @@ func Run() {
 
 	// Worker pool: 2 workers in 2 goroutines.
 	pool := worker.NewPool(st, kc, worker.DefaultConfig())
-	pool.Start()
+	go pool.Start()
 	defer pool.Stop()
 
 	// HTTP API: create pod / pod status.

@@ -77,7 +77,7 @@ Makefile             cluster + app lifecycle
 - Why `sync.RWMutex` instead of `sync.Mutex`? (many concurrent status reads)
 - Why is `queue` a channel while the maps need a mutex? (channels for hand-off, mutex
   for shared state)
-- What happens if a worker is busy for more than one tick? (queue buffered 128, names
+- What happens if a worker is busy for more than one tick? (queue buffered 1000, names
   are dropped if full — a good place to discuss back-pressure)
 - What happens if the app restarts? (in-memory state is lost; the demo pods still run —
   a good segue into reconciliation/StatefulSets)

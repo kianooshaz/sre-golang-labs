@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"go.opentelemetry.io/otel/codes"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"sre-labs/21-observibility/internal/kube"
@@ -56,12 +57,14 @@ func (h *handlers) createPod(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		obs.PodCreations.WithLabelValues("invalid").Inc()
 		span.SetAttributes(obs.AttrsOf("outcome", "invalid")...)
+		span.SetStatus(codes.Error, err.Error())
 		writeError(w, http.StatusBadRequest, "invalid json body")
 		return
 	}
 	if err := req.validate(); err != nil {
 		obs.PodCreations.WithLabelValues("invalid").Inc()
 		span.SetAttributes(obs.AttrsOf("outcome", "invalid")...)
+		span.SetStatus(codes.Error, err.Error())
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -113,7 +116,8 @@ func (h *handlers) createPod(w http.ResponseWriter, r *http.Request) {
 
 // listPods handles GET /api/v1/pods
 func (h *handlers) listPods(w http.ResponseWriter, r *http.Request) {
-	_, _, log := obs.StartSpan(r.Context(), "handlers.listPods")
+	_, span, log := obs.StartSpan(r.Context(), "handlers.listPods")
+	defer obs.EndSpan(span, nil)
 	pods := h.store.ListPods()
 	log.Debug("listed pods", "count", len(pods))
 	writeJSON(w, http.StatusOK, pods)

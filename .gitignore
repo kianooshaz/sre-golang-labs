@@ -8,6 +8,13 @@
 *.so
 *.dylib
 
+# Compiled lab exercises (`go build -o learn-xxx .`) and build output dirs
+learn-*
+bin/
+
+# Runtime logs
+*.log
+
 # Test binary, built with `go test -c`
 *.test
 
