@@ -1,0 +1,23 @@
+# logan's default configuration. Every key can be overridden with an env
+# variable where `__` nests: LOGAN_POOL__WORKERS=8, LOGAN_SERVER__ADDR=:9090.
+server:
+  addr: ":8080"
+  shutdown_grace: 10s
+
+database:
+  path: "logan.db"
+
+pool:
+  workers: 4
+  queue_size: 1024
+  batch_size: 100
+  flush_interval: 2s
+
+alerts:
+  window: 5m
+  threshold: 0.30
+  cooldown: 10m
+  check_interval: 30s
+
+log:
+  level: info

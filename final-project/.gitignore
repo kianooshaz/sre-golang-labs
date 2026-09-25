@@ -1,0 +1,3 @@
+bin/
+*.db
+testdata/big.log
